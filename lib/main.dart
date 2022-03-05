@@ -38,6 +38,7 @@ class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
   final _biggerFont = const TextStyle(fontSize: 18.0);
   final _saved = <WordPair>{};
+  bool _viewList = true;
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +48,19 @@ class _RandomWordsState extends State<RandomWords> {
         actions: [
           IconButton(
             onPressed: _pushsaved,
-            icon: const Icon(Icons.list),
+            icon: const Icon(Icons.favorite),
             tooltip: 'Saved Suggestions',
           ),
         ],
+        leading: IconButton(
+          onPressed: () {
+            setState(() {
+              _viewList ? _viewList = false : _viewList = true;
+            });
+          },
+          icon: const Icon(Icons.grid_view),
+          tooltip: 'alter visualization',
+        ),
       ),
       body: _buildSuggestions(),
     );
@@ -83,18 +93,34 @@ class _RandomWordsState extends State<RandomWords> {
   }
 
   Widget _buildSuggestions() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: (context, i) {
-        if (i.isOdd) return const Divider();
+    if (_viewList) {
+      return ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemBuilder: (context, i) {
+          if (i.isOdd) return const Divider();
 
-        final index = i ~/ 2;
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      },
-    );
+          final index = i ~/ 2;
+          if (index >= _suggestions.length) {
+            _suggestions.addAll(generateWordPairs().take(10));
+          }
+          return _buildRow(_suggestions[index]);
+        },
+      );
+    } else {
+      return GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 5.0,
+                mainAxisSpacing: 5.0,
+              ),
+        itemBuilder: (context, i) {
+          if (i >= _suggestions.length) {
+            _suggestions.addAll(generateWordPairs().take(10));
+          }
+          return Card(child: _buildRow(_suggestions[i]),);
+        },
+        );
+    }
   }
 
   Widget _buildRow(WordPair pair) {
