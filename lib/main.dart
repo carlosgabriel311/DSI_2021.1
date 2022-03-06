@@ -58,7 +58,7 @@ class _RandomWordsState extends State<RandomWords> {
               _viewList ? _viewList = false : _viewList = true;
             });
           },
-          icon: const Icon(Icons.grid_view),
+          icon: Icon(_viewList?  Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
       ),
@@ -109,6 +109,7 @@ class _RandomWordsState extends State<RandomWords> {
     } else {
       return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                childAspectRatio: 4,
                 crossAxisCount: 2,
                 crossAxisSpacing: 5.0,
                 mainAxisSpacing: 5.0,
@@ -117,7 +118,7 @@ class _RandomWordsState extends State<RandomWords> {
           if (i >= _suggestions.length) {
             _suggestions.addAll(generateWordPairs().take(10));
           }
-          return Card(child: _buildRow(_suggestions[i]),);
+          return Card(child: _buildRow(_suggestions[i]));
         },
         );
     }
