@@ -58,7 +58,7 @@ class _RandomWordsState extends State<RandomWords> {
               _viewList ? _viewList = false : _viewList = true;
             });
           },
-          icon: Icon(_viewList?  Icons.grid_view : Icons.list),
+          icon: Icon(_viewList ? Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
       ),
@@ -109,42 +109,51 @@ class _RandomWordsState extends State<RandomWords> {
     } else {
       return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                childAspectRatio: 4,
-                crossAxisCount: 2,
-                crossAxisSpacing: 5.0,
-                mainAxisSpacing: 5.0,
-              ),
+          childAspectRatio: 4,
+          crossAxisCount: 2,
+          crossAxisSpacing: 5.0,
+          mainAxisSpacing: 5.0,
+        ),
         itemBuilder: (context, i) {
           if (i >= _suggestions.length) {
             _suggestions.addAll(generateWordPairs().take(10));
           }
           return Card(child: _buildRow(_suggestions[i]));
         },
-        );
+      );
     }
   }
 
   Widget _buildRow(WordPair pair) {
     final alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-        semanticLabel: alreadySaved ? 'remove from saved' : 'Save',
-      ),
-      onTap: () {
+    return Dismissible(
+      key: Key(pair.toString()),
+      onDismissed: (direction) {
         setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
+          _suggestions.remove(pair);
+          _saved.remove(pair);
         });
       },
+      child: ListTile(
+        title: Text(
+          pair.asPascalCase,
+          style: _biggerFont,
+        ),
+        trailing: IconButton(
+          icon: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border),
+          color: alreadySaved ? Colors.red : null,
+          tooltip: alreadySaved ? 'remove from saved' : 'Save',
+          onPressed: () {
+            setState(() {
+              if (alreadySaved) {
+                _saved.remove(pair);
+              } else {
+                _saved.add(pair);
+              }
+            });
+          },
+        ),
+      ),
     );
   }
 }
