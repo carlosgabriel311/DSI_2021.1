@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 class Words {
   final suggestions = <Word>[];
   final saved = <Word>{};
+  bool viewList = true;
 
   Words() {
     generateWords(20);
@@ -76,7 +77,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _biggerFont = const TextStyle(fontSize: 18.0);
-  bool _viewList = true;
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             setState(
               () {
-                _viewList ? _viewList = false : _viewList = true;
+                words.viewList ? words.viewList = false : words.viewList = true;
               },
             );
           },
-          icon: Icon(_viewList ? Icons.grid_view : Icons.list),
+          icon: Icon(words.viewList ? Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
       ),
@@ -107,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSuggestions() {
-    if (_viewList) {
+    if (words.viewList) {
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
@@ -178,7 +179,6 @@ class SaveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
     final tiles = words.saved.map((pair) {
       return ListTile(
         title: Text(
@@ -203,35 +203,70 @@ class SaveScreen extends StatelessWidget {
   }
 }
 
-class EditScreen extends StatelessWidget {
+class EditScreen extends StatefulWidget {
   const EditScreen({Key? key}) : super(key: key);
   static const routeName = '/edit';
 
   @override
+  State<EditScreen> createState() => _EditScreenState();
+}
+
+class _EditScreenState extends State<EditScreen> {
+  @override
   Widget build(BuildContext context) {
     final _palavra = ModalRoute.of(context)!.settings.arguments as Word;
+    final _formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Page'),
       ),
       body: Form(
+        key: _formKey,
         child: Column(
           children: [
-            TextFormField(
-              initialValue: _palavra.first,
-              onChanged: (texto) => _palavra.first = texto,
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => _validarEntrada(value!),
+                initialValue: _palavra.first,
+                onSaved: (texto) => _palavra.first = texto.toString(),
+              ),
             ),
-            TextFormField(
-              initialValue: _palavra.second,
-              onChanged: (texto) => _palavra.second = texto,
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => _validarEntrada(value!),
+                initialValue: _palavra.second,
+                onSaved: (texto) => _palavra.second = texto.toString(),
+              ),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.popAndPushNamed(context, '/'),
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("successfully")));
+                  Navigator.popAndPushNamed(context, '/');
+                }
+              },
               child: const Text('Submit'),
             )
           ],
         ),
       ),
     );
+  }
+
+  String? _validarEntrada(String value) {
+    if (value.isEmpty) {
+      return 'Informe um valor';
+    }
+    return null;
   }
 }
