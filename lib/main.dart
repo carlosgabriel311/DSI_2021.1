@@ -6,17 +6,53 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
 class Words {
-  final suggestions = <Word>[];
-  final saved = <Word>{};
-  bool viewList = true;
+  final _suggestions = <Word>[];
+  final _favorites = <Word>{};
+  bool _view = true;
 
   Words() {
-    generateWords(20);
+    generateSuggestion(20);
   }
-  void generateWords(int count) {
+
+  void generateSuggestion(int count) {
     for (var i = 0; i < count; i++) {
-      suggestions.add(Word());
+      _suggestions.add(Word());
     }
+  }
+
+  List getAllSuggestions() {
+    return _suggestions;
+  }
+
+  Word getSuggestionByIndex(int index) {
+    return _suggestions[index];
+  }
+
+  void removeSuggestion(Word value) {
+    _suggestions.remove(value);
+  }
+
+  void addToFavorites(Word value) {
+    _favorites.add(value);
+  }
+
+  void removeFavorite(Word value) {
+    _favorites.remove(value);
+  }
+
+  Set getAllFavorites() {
+    return _favorites;
+  }
+
+  bool isFavorite(Word value) {
+    return _favorites.contains(value);
+  }
+
+  bool view() {
+    return _view;
+  }
+  void alterView(bool value){
+    _view = value;
   }
 }
 
@@ -78,7 +114,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,11 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             setState(
               () {
-                words.viewList ? words.viewList = false : words.viewList = true;
+                words.view() ? words.alterView(false) : words.alterView(true);
               },
             );
           },
-          icon: Icon(words.viewList ? Icons.grid_view : Icons.list),
+          icon: Icon(words.view() ? Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
       ),
@@ -108,16 +143,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSuggestions() {
-    if (words.viewList) {
+    if (words.view()) {
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
           if (i.isOdd) return const Divider();
           final index = i ~/ 2;
-          if (index >= words.suggestions.length) {
-            words.generateWords(10);
+          if (index >= words.getAllSuggestions().length) {
+            words.generateSuggestion(10);
           }
-          return _buildRow(words.suggestions[index]);
+          return _buildRow(words.getSuggestionByIndex(index));
         },
       );
     } else {
@@ -129,23 +164,23 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSpacing: 5.0,
         ),
         itemBuilder: (context, i) {
-          if (i >= words.suggestions.length) {
-            words.generateWords(10);
+          if (i >= words.getAllSuggestions().length) {
+            words.generateSuggestion(10);
           }
-          return Card(child: _buildRow(words.suggestions[i]));
+          return Card(child: _buildRow(words.getSuggestionByIndex(i)));
         },
       );
     }
   }
 
   Widget _buildRow(Word pair) {
-    final alreadySaved = words.saved.contains(pair);
+    final alreadySaved = words.isFavorite(pair);
     return Dismissible(
       key: Key(pair.toString()),
       onDismissed: (direction) {
         setState(() {
-          words.suggestions.remove(pair);
-          words.saved.remove(pair);
+          words.removeSuggestion(pair);
+          words.removeFavorite(pair);
         });
       },
       child: ListTile(
@@ -160,9 +195,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             setState(() {
               if (alreadySaved) {
-                words.saved.remove(pair);
+                words.removeFavorite(pair);
               } else {
-                words.saved.add(pair);
+                words.addToFavorites(pair);
               }
             });
           },
@@ -179,7 +214,7 @@ class SaveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiles = words.saved.map((pair) {
+    final tiles = words.getAllFavorites().map((pair) {
       return ListTile(
         title: Text(
           pair.asPascalCase(),
