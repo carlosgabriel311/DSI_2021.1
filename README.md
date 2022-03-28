@@ -3,19 +3,19 @@ Projeto criado para a disciplina de Desenvolvimento de Sistemas de Informação 
 
 ## ✔️ Técnicas e tecnologias utilizadas
 
-- 'Flutter'
-- 'CRUD'
-- 'Orientação a Objeto'
-- 'Repository Pattern'
+- `Flutter`
+- `CRUD`
+- `Orientação a Objeto`
+- `Repository Pattern`
 
 ## 🔱 Separação do projeto
 Cada semana de atividade se encontra em suas respectivas branchs
 
-- 'semana 1': Topico-1
-- 'semana 2': Topico-2
-- 'semana 3': Topico-3
-- 'semana 4': Topico-4
-- 'semana 5': Topico-5
+- `semana 1`: Topico-1
+- `semana 2`: Topico-2
+- `semana 3`: Topico-3
+- `semana 4`: Topico-4
+- `semana 5`: Topico-5
 
 ## ⚠️ aviso
 Este projeto foi utilizado pelo professor para introduzir os alunos ao frammework Flutter e por isso vai apenas até a 5º semana.
