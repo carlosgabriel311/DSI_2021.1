@@ -11,11 +11,11 @@ Projeto criado para a disciplina de Desenvolvimento de Sistemas de Informação 
 ## 🔱 Separação do projeto
 Cada semana de atividade se encontra em suas respectivas branchs
 
-- `semana 1`: Topico-1
-- `semana 2`: Topico-2
-- `semana 3`: Topico-3
-- `semana 4`: Topico-4
-- `semana 5`: Topico-5
+- `Semana 1`: Topico-1
+- `Semana 2`: Topico-2
+- `Semana 3`: Topico-3
+- `Semana 4`: Topico-4
+- `Semana 5`: Topico-5
 
 ## ⚠️ aviso
 Este projeto foi utilizado pelo professor para introduzir os alunos ao frammework Flutter e por isso vai apenas até a 5º semana.
