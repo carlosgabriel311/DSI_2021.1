@@ -1,16 +1,7 @@
-# startup_namer
+# Atividade da semana
 
-A new Flutter project.
+Criar um ícone na tela da listagem com um (+) para exibir uma tela para a inclusão de novas palavras.
 
-## Getting Started
+Ao salvar, o objeto deve ser incluído na lista de palavras.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Deve-se usar a mesma tela da edição com os campos em branco.
