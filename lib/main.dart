@@ -16,12 +16,16 @@ class Words {
 
   void generateSuggestion(int count) {
     for (var i = 0; i < count; i++) {
-      _suggestions.add(Word());
+      _suggestions.add(Word(false));
     }
   }
 
   List getAllSuggestions() {
     return _suggestions;
+  }
+
+  void addSuggestion(Word value) {
+    _suggestions.insert(0, value);
   }
 
   Word getSuggestionByIndex(int index) {
@@ -51,7 +55,8 @@ class Words {
   bool view() {
     return _view;
   }
-  void alterView(bool value){
+
+  void alterView(bool value) {
     _view = value;
   }
 }
@@ -59,11 +64,14 @@ class Words {
 class Word {
   String first = '';
   String second = '';
+  bool manualCreation;
 
-  Word() {
-    var word = generateWordPairs().first;
-    first = word.first;
-    second = word.second;
+  Word(this.manualCreation) {
+    if (!manualCreation) {
+      var word = generateWordPairs().first;
+      first = word.first;
+      second = word.second;
+    }
   }
 
   String asPascalCase() {
@@ -71,6 +79,14 @@ class Word {
         first.substring(1) +
         second[0].toUpperCase() +
         second.substring(1);
+  }
+
+  bool isManualCreation() {
+    return manualCreation;
+  }
+
+  void alterManualCreation(bool value) {
+    manualCreation = value;
   }
 }
 
@@ -137,6 +153,15 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icon(words.view() ? Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(
+          context,
+          EditScreen.routeName,
+          arguments: Word(true),
+        ),
+        child: const Icon(Icons.add),
+        backgroundColor: const Color.fromRGBO(0, 0, 255, 0.4),
       ),
       body: _buildSuggestions(),
     );
@@ -253,7 +278,9 @@ class _EditScreenState extends State<EditScreen> {
     final _formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Page'),
+        title: _palavra.isManualCreation()
+            ? const Text('create Page')
+            : const Text('Edit Page'),
       ),
       body: Form(
         key: _formKey,
@@ -267,7 +294,7 @@ class _EditScreenState extends State<EditScreen> {
                 ),
                 validator: (value) => _validarEntrada(value!),
                 initialValue: _palavra.first,
-                onSaved: (texto) => _palavra.first = texto.toString(),
+                onSaved: (text) => _palavra.first = text.toString(),
               ),
             ),
             Container(
@@ -278,13 +305,17 @@ class _EditScreenState extends State<EditScreen> {
                 ),
                 validator: (value) => _validarEntrada(value!),
                 initialValue: _palavra.second,
-                onSaved: (texto) => _palavra.second = texto.toString(),
+                onSaved: (text) => _palavra.second = text.toString(),
               ),
             ),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
+                  if (_palavra.isManualCreation()) {
+                    _palavra.alterManualCreation(false);
+                    words.addSuggestion(_palavra);
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("successfully")));
                   Navigator.popAndPushNamed(context, '/');
