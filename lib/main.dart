@@ -1,98 +1,11 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:startup_namer/Repositories/firebase_repository.dart';
 
-class Words {
-  final _suggestions = <Word>[];
-  final _favorites = <Word>{};
-  bool _view = true;
+FirebaseRepository words = FirebaseRepository();
+bool view = true;
 
-  Words() {
-    generateSuggestion(20);
-  }
-
-  void generateSuggestion(int count) {
-    for (var i = 0; i < count; i++) {
-      _suggestions.add(Word(false));
-    }
-  }
-
-  List getAllSuggestions() {
-    return _suggestions;
-  }
-
-  void addSuggestion(Word value) {
-    _suggestions.insert(0, value);
-  }
-
-  Word getSuggestionByIndex(int index) {
-    return _suggestions[index];
-  }
-
-  void removeSuggestion(Word value) {
-    _suggestions.remove(value);
-  }
-
-  void addToFavorites(Word value) {
-    _favorites.add(value);
-  }
-
-  void removeFavorite(Word value) {
-    _favorites.remove(value);
-  }
-
-  Set getAllFavorites() {
-    return _favorites;
-  }
-
-  bool isFavorite(Word value) {
-    return _favorites.contains(value);
-  }
-
-  bool view() {
-    return _view;
-  }
-
-  void alterView(bool value) {
-    _view = value;
-  }
-}
-
-class Word {
-  String first = '';
-  String second = '';
-  bool manualCreation;
-
-  Word(this.manualCreation) {
-    if (!manualCreation) {
-      var word = generateWordPairs().first;
-      first = word.first;
-      second = word.second;
-    }
-  }
-
-  String asPascalCase() {
-    return first[0].toUpperCase() +
-        first.substring(1) +
-        second[0].toUpperCase() +
-        second.substring(1);
-  }
-
-  bool isManualCreation() {
-    return manualCreation;
-  }
-
-  void alterManualCreation(bool value) {
-    manualCreation = value;
-  }
-}
-
-Words words = Words();
-
-void main() {
+void main() async {
+  await words.initialazeRepository();
   runApp(const MyApp());
 }
 
@@ -112,7 +25,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         HomeScreen.routeName: (context) => const HomeScreen(),
-        EditScreen.routeName: (context) => const EditScreen(),
+        //EditScreen.routeName: (context) => const EditScreen(),
         SaveScreen.routeName: (context) => const SaveScreen(),
       },
     );
@@ -128,8 +41,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,20 +57,21 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             setState(
               () {
-                words.view() ? words.alterView(false) : words.alterView(true);
+                view ? view = false : view = true;
               },
             );
           },
-          icon: Icon(words.view() ? Icons.grid_view : Icons.list),
+          icon: Icon(view ? Icons.grid_view : Icons.list),
           tooltip: 'alter visualization',
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(
+        onPressed: () => {},
+        /*Navigator.pushNamed(
           context,
           EditScreen.routeName,
-          arguments: Word(true),
-        ),
+          arguments: ,
+        ),*/
         child: const Icon(Icons.add),
         backgroundColor: const Color.fromRGBO(0, 0, 255, 0.4),
       ),
@@ -168,16 +80,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSuggestions() {
-    if (words.view()) {
+    if (view) {
       return ListView.builder(
         padding: const EdgeInsets.all(16.0),
         itemBuilder: (context, i) {
           if (i.isOdd) return const Divider();
           final index = i ~/ 2;
-          if (index >= words.getAllSuggestions().length) {
-            words.generateSuggestion(10);
+          if (index >= words.getSize()) {
+            words.createSuggestion();
           }
-          return _buildRow(words.getSuggestionByIndex(index));
+          return _buildRow(words.getWordPairs(index));
         },
       );
     } else {
@@ -188,11 +100,11 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisSpacing: 5.0,
           mainAxisSpacing: 5.0,
         ),
-        itemBuilder: (context, i) {
-          if (i >= words.getAllSuggestions().length) {
-            words.generateSuggestion(10);
+        itemBuilder: (context, index) {
+          if (index >= words.getSize()) {
+            words.createSuggestion();
           }
-          return Card(child: _buildRow(words.getSuggestionByIndex(i)));
+          return Card(child: _buildRow(words.getWordPairs(index)));
         },
       );
     }
@@ -201,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildRow(Word pair) {
     final alreadySaved = words.isFavorite(pair);
     return Dismissible(
-      key: Key(pair.toString()),
+      key: Key(pair.id),
       onDismissed: (direction) {
         setState(() {
           words.removeSuggestion(pair);
@@ -209,26 +121,29 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       },
       child: ListTile(
-        title: Text(
-          pair.asPascalCase(),
-          style: _biggerFont,
-        ),
-        trailing: IconButton(
-          icon: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border),
-          color: alreadySaved ? Colors.red : null,
-          tooltip: alreadySaved ? 'remove from saved' : 'Save',
-          onPressed: () {
-            setState(() {
-              if (alreadySaved) {
-                words.removeFavorite(pair);
-              } else {
-                words.addToFavorites(pair);
-              }
-            });
-          },
-        ),
-        onTap: () => Navigator.pushNamed(context, '/edit', arguments: pair),
-      ),
+          title: Text(
+            pair.asPascalCase(),
+            style: const TextStyle(
+              fontSize: 18,
+            ),
+          ),
+          trailing: IconButton(
+            icon: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border),
+            color: alreadySaved ? Colors.red : null,
+            tooltip: alreadySaved ? 'remove from saved' : 'Save',
+            onPressed: () {
+              setState(() {
+                if (alreadySaved) {
+                  words.removeFavorite(pair);
+                } else {
+                  words.addToFavorites(pair);
+                }
+              });
+            },
+          ),
+          onTap: () =>
+              {} // Navigator.pushNamed(context, '/edit', arguments: pair),
+          ),
     );
   }
 }
@@ -239,7 +154,7 @@ class SaveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiles = words.getAllFavorites().map((pair) {
+    final tiles = words.getFavorites().map((pair) {
       return ListTile(
         title: Text(
           pair.asPascalCase(),
@@ -262,7 +177,7 @@ class SaveScreen extends StatelessWidget {
     );
   }
 }
-
+/*
 class EditScreen extends StatefulWidget {
   const EditScreen({Key? key}) : super(key: key);
   static const routeName = '/edit';
@@ -274,7 +189,7 @@ class EditScreen extends StatefulWidget {
 class _EditScreenState extends State<EditScreen> {
   @override
   Widget build(BuildContext context) {
-    final _palavra = ModalRoute.of(context)!.settings.arguments as Word;
+    final _palavra = ModalRoute.of(context)!.settings.arguments;
     final _formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
@@ -336,3 +251,4 @@ class _EditScreenState extends State<EditScreen> {
     return null;
   }
 }
+*/
