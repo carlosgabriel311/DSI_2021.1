@@ -16,7 +16,9 @@ Cada semana de atividade se encontra em suas respectivas branchs
 - `Semana 3`: Topico-3
 - `Semana 4`: Topico-4
 - `Semana 5`: Topico-5
+- `Semana 7`: Topico-7
 
 ## ⚠️ aviso
-Este projeto foi utilizado pelo professor para introduzir os alunos ao frammework Flutter e por isso vai apenas até a 5º semana.
-A partir da 6º semana, será implementado um projeto de Machine Learning em conjunto com outras disciplinas.
+- `OBS 1`: Este projeto foi utilizado pelo professor para introduzir os alunos ao frammework Flutter e por isso vai apenas até a 7º semana. 
+
+- `OBS 2`: O motivo de não existir a branch da 6º semana, se dá pelo fato de termos começado a implementar um projeto em conjunto com outras disciplinas, consistindo na construção de um algortimo de machine learning e sua integração em um aplicativo Flutter.
