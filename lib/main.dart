@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         HomeScreen.routeName: (context) => const HomeScreen(),
-        //EditScreen.routeName: (context) => const EditScreen(),
+        EditScreen.routeName: (context) => const EditScreen(),
         SaveScreen.routeName: (context) => const SaveScreen(),
       },
     );
@@ -66,12 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {},
-        /*Navigator.pushNamed(
+        onPressed: () => Navigator.pushNamed(
           context,
           EditScreen.routeName,
-          arguments: ,
-        ),*/
+          arguments: Word('', '', ''),
+        ),
         child: const Icon(Icons.add),
         backgroundColor: const Color.fromRGBO(0, 0, 255, 0.4),
       ),
@@ -87,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (i.isOdd) return const Divider();
           final index = i ~/ 2;
           if (index >= words.getSize()) {
-            words.createSuggestion();
+            words.createSuggestions();
           }
           return _buildRow(words.getWordPairs(index));
         },
@@ -102,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         itemBuilder: (context, index) {
           if (index >= words.getSize()) {
-            words.createSuggestion();
+            words.createSuggestions();
           }
           return Card(child: _buildRow(words.getWordPairs(index)));
         },
@@ -121,29 +120,28 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       },
       child: ListTile(
-          title: Text(
-            pair.asPascalCase(),
-            style: const TextStyle(
-              fontSize: 18,
-            ),
+        title: Text(
+          pair.asPascalCase(),
+          style: const TextStyle(
+            fontSize: 18,
           ),
-          trailing: IconButton(
-            icon: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border),
-            color: alreadySaved ? Colors.red : null,
-            tooltip: alreadySaved ? 'remove from saved' : 'Save',
-            onPressed: () {
-              setState(() {
-                if (alreadySaved) {
-                  words.removeFavorite(pair);
-                } else {
-                  words.addToFavorites(pair);
-                }
-              });
-            },
-          ),
-          onTap: () =>
-              {} // Navigator.pushNamed(context, '/edit', arguments: pair),
-          ),
+        ),
+        trailing: IconButton(
+          icon: Icon(alreadySaved ? Icons.favorite : Icons.favorite_border),
+          color: alreadySaved ? Colors.red : null,
+          tooltip: alreadySaved ? 'remove from saved' : 'Save',
+          onPressed: () {
+            setState(() {
+              if (alreadySaved) {
+                words.removeFavorite(pair);
+              } else {
+                words.addToFavorites(pair);
+              }
+            });
+          },
+        ),
+        onTap: () => Navigator.pushNamed(context, '/edit', arguments: pair),
+      ),
     );
   }
 }
@@ -177,7 +175,7 @@ class SaveScreen extends StatelessWidget {
     );
   }
 }
-/*
+
 class EditScreen extends StatefulWidget {
   const EditScreen({Key? key}) : super(key: key);
   static const routeName = '/edit';
@@ -189,11 +187,12 @@ class EditScreen extends StatefulWidget {
 class _EditScreenState extends State<EditScreen> {
   @override
   Widget build(BuildContext context) {
-    final _palavra = ModalRoute.of(context)!.settings.arguments;
+    final _palavra = ModalRoute.of(context)!.settings.arguments as Word;
+    bool isNewSuggestion = _palavra.id.isEmpty;
     final _formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
-        title: _palavra.isManualCreation()
+        title: isNewSuggestion
             ? const Text('create Page')
             : const Text('Edit Page'),
       ),
@@ -227,9 +226,10 @@ class _EditScreenState extends State<EditScreen> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-                  if (_palavra.isManualCreation()) {
-                    _palavra.alterManualCreation(false);
-                    words.addSuggestion(_palavra);
+                  if (isNewSuggestion) {
+                    words.addUserSuggestion(_palavra);
+                  } else {
+                    words.updateWord(_palavra);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("successfully")));
@@ -251,4 +251,3 @@ class _EditScreenState extends State<EditScreen> {
     return null;
   }
 }
-*/

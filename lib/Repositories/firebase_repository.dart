@@ -38,7 +38,7 @@ class FirebaseRepository {
     }
   }
 
-  void createSuggestion() {
+  void createSuggestions() {
     for (var i = 0; i < 20; i++) {
       Timestamp id = Timestamp.now();
       var word = generateWordPairs().first;
@@ -49,20 +49,39 @@ class FirebaseRepository {
     }
   }
 
+  void addUserSuggestion(Word word) {
+    Timestamp id = Timestamp.now();
+    word.id = id.toString();
+    wordsCollection.doc(id.toString()).set(
+      {'primeira': word.first, 'segunda': word.second},
+    );
+    _suggestions.insert(0, word);
+  }
+
   void removeSuggestion(Word word) {
     wordsCollection.doc(word.id).delete();
     _suggestions.remove(word);
   }
 
-  /*void updateWorPair(int id, String primeira, String segunda) {
-    var collection = FirebaseFirestore.instance.collection('Words');
-    collection.doc('$id').update(
+  void updateWord(Word word) {
+    wordsCollection.doc(word.id).update(
       {
-        'primeira': primeira,
-        'segunda': segunda,
+        'primeira': word.first,
+        'segunda': word.second,
       },
     );
-  }*/
+    if (isFavorite(word)) {
+      favoriteCollection.doc(word.id).update(
+        {
+          'primeira': word.first,
+          'segunda': word.second,
+        },
+      );
+      var result = _favorites.firstWhere((element) => element.id == word.id);
+      result.first = word.first;
+      result.second = word.second;
+    }
+  }
 
   getWordPairs(int key) {
     return _suggestions[key];
