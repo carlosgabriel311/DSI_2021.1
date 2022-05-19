@@ -23,4 +23,4 @@ Cada semana de atividade se encontra em suas respectivas branchs
 
 - `OBS 2`: O motivo de não existir a branch da 6º semana, se dá pelo fato de termos começado a implementar um projeto em conjunto com outras disciplinas, consistindo na construção de um algortimo de machine learning e sua integração em um aplicativo Flutter.
 
--`OBS 3`: O código fonte presenta na main é a ultima versão da atividade solicitada
+- `OBS 3`: O código fonte presenta na main é a ultima versão da atividade solicitada
